@@ -97,17 +97,17 @@ func (linter *Linter) lintStruct(st *dst.StructType, typesStruct *types.Struct) 
 		name2 := field2.Names[0].Name
 		size1 := fieldSizes[name1]
 		size2 := fieldSizes[name2]
+		if size1 == size2 {
+			// if sizes are equal then order alphabetically
+			var name1Lower = strings.ToLower(name1)
+			var name2Lower = strings.ToLower(name2)
+			if name1Lower == name2Lower {
+				return name1 < name2
+			}
+			return name1Lower < name2Lower
+		}
 		// lower sizes on top
-		if size1 < size2 {
-			return true
-		}
-		// if sizes are equal then order alphabetically
-		var name1Lower = strings.ToLower(name1)
-		var name2Lower = strings.ToLower(name2)
-		if name1Lower == name2Lower {
-			return name1 < name2
-		}
-		return name1Lower < name2Lower
+		return size1 < size2
 
 	})
 	return nil
