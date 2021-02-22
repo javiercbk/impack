@@ -53,12 +53,12 @@ func NewLinter(compiler, arch string) *Linter {
 }
 
 // Lint finds all structs in a package and lints them
-func (linter *Linter) Lint(ctx context.Context, projectRoot string) error {
+func (linter *Linter) Lint(ctx context.Context, packagePath string) error {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{
 		Fset:    fset,
 		Context: ctx,
-		Dir:     projectRoot,
+		Dir:     packagePath,
 		Mode:    packages.LoadAllSyntax,
 		Tests:   false,
 	}
@@ -68,6 +68,9 @@ func (linter *Linter) Lint(ctx context.Context, projectRoot string) error {
 	}
 	for _, pkg := range pkgs {
 		// avoid bound check
+		if len(pkg.GoFiles) == 0 {
+			continue
+		}
 		_ = pkg.GoFiles[len(pkg.Syntax)-1]
 		for i, dstFile := range pkg.Syntax {
 			fileChanged := false
