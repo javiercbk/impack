@@ -19,7 +19,7 @@ go get -u github.com/javiercbk/impack/cmd/impack
 `impack` will lint a whole package, and re-order every struct's fields in the package.
 
 ```sh
-impack --compiler gc --arch amd64 /home/user/path/to/go/package/folder
+impack --compiler gc --arch amd64 /home/user/path/to/go/package/folder1 /home/user/path/to/go/package/folder2
 ```
 
 * The first unnammed parameter will be considered as the package path. By default it will be the current folder

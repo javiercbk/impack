@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/javiercbk/impack"
 )
 
 func main() {
-	var packagePath string
 	var compiler string
 	var arch string
 	flag.StringVar(&compiler, "compiler", "gc", "the go compiler")
@@ -28,12 +26,13 @@ func main() {
 		}
 		folders[i] = args[i]
 	}
-	packagePath = strings.TrimSpace(packagePath)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	linter := impack.NewLinter(compiler, arch)
-	err := linter.Lint(ctx, packagePath)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
+	for _, folder := range folders {
+		err := linter.Lint(ctx, folder)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 }
