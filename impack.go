@@ -17,6 +17,17 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+type linterErr string
+
+func (l linterErr) Error() string {
+	return string(l)
+}
+
+const (
+	// ErrInvalidCompilerArch is returned when sizes could not be retrieved
+	ErrInvalidCompilerArch linterErr = "invalid compiler or architecture"
+)
+
 const (
 	emptyInterface   = "interface{}"
 	goTypeBool       = "bool"
@@ -46,10 +57,14 @@ type Linter struct {
 }
 
 // NewLinter creates a new ImpackLinter by setting up the sizes and alignments
-func NewLinter(compiler, arch string) *Linter {
-	return &Linter{
-		sizes: types.SizesFor(compiler, arch),
+func NewLinter(compiler, arch string) (*Linter, error) {
+	sizes := types.SizesFor(compiler, arch)
+	if sizes == nil {
+		return nil, ErrInvalidCompilerArch
 	}
+	return &Linter{
+		sizes: sizes,
+	}, nil
 }
 
 // Lint finds all structs in a package and lints them
@@ -123,6 +138,19 @@ func (linter *Linter) lintStruct(st *dst.StructType, typesStruct *types.Struct) 
 	sort.SliceStable(st.Fields.List, func(i, j int) bool {
 		field1 := st.Fields.List[i]
 		field2 := st.Fields.List[j]
+		field1IsEmbed := field1.Names == nil
+		field2IsEmbed := field2.Names == nil
+		if field1IsEmbed && !field2IsEmbed {
+			// embedded fields go first
+			return true
+		} else if !field1IsEmbed && field2IsEmbed {
+			return false
+		} else if field1IsEmbed && field2IsEmbed {
+			// if both fields are embedded, order alphabetically
+			field1TypeNode := field1.Type.(*dst.Ident)
+			field2TypeNode := field1.Type.(*dst.Ident)
+			return orderAlpha(field1TypeNode.Name, field2TypeNode.Name)
+		}
 		name1 := field1.Names[0].Name
 		name2 := field2.Names[0].Name
 		size1 := fieldSizes[name1]

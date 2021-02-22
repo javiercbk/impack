@@ -28,9 +28,13 @@ func main() {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	linter := impack.NewLinter(compiler, arch)
+	linter, err := impack.NewLinter(compiler, arch)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 	for _, folder := range folders {
-		err := linter.Lint(ctx, folder)
+		err = linter.Lint(ctx, folder)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
