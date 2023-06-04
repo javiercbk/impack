@@ -11,7 +11,7 @@ This is an imperfect memory packer since it does not maximize memory efficiency 
 ## Install
 
 ```sh
-go get -u github.com/javiercbk/impack/cmd/impack
+go install github.com/javiercbk/impack/cmd/impack@latest
 ```
 
 ## Usage
